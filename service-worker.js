@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bp-inr-v29'; // Aktualizácia po zmene int64 štruktúry
+const CACHE_NAME = 'bp-inr-v30'; // Aktualizácia pre zmenu navigácie (non-fixed)
 const ASSETS = [
   './',
   'index.html',
