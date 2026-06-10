@@ -30,12 +30,17 @@ onSnapshot(docRef, (snapshot) => {
     aktualnyPriemer = (celkovyPocetHlasov > 0) ? (Number(data.sucetHviezd) / Number(celkovyPocetHlasov)) : 0;
     
     if (celkovyPocetHlasov > 0) {
-        ratingText.innerText = `${aktualnyPriemer.toFixed(1)} / 5 (${celkovyPocetHlasov} ${celkovyPocetHlasov === 1 ? 'hodnotenie' : 'hodnotení'})`;
+        ratingText.innerText = `${aktualnyPriemer.toFixed(1)} ★ / (${celkovyPocetHlasov} ${celkovyPocetHlasov === 1 ? 'hodnotenie' : 'hodnotení'})`;
     } else {
         ratingText.innerText = "Zatiaľ nikto nehodnotil. Buďte prvý!";
     }
     
     aktualizujHviezdy(Math.round(aktualnyPriemer));
+
+    // Ak už používateľ hlasoval, skryjeme hviezdičky úplne
+    if (localStorage.getItem('uz_hlasoval') && starsContainer) {
+      starsContainer.classList.add('hidden');
+    }
   } else {
     console.log("Dokument 'recenzia/celkove' zatiaľ v DB neexistuje. Čakám na prvý hlas.");
     ratingText.innerText = "Zatiaľ nikto nehodnotil. Buďte prvý!";
@@ -70,12 +75,13 @@ const odoslatHlas = async (pocet) => {
 
   // Zabránenie viacnásobnému hlasovaniu (jednoduchá ochrana cez localStorage)
   if (localStorage.getItem('uz_hlasoval')) {
-    // Vždy aktualizujeme text a hviezdy na aktuálny stav z DB pri pokuse o hlasovanie
-    aktualizujHviezdy(Math.round(aktualnyPriemer));
     ratingText.innerText = celkovyPocetHlasov > 0 
-        ? `${aktualnyPriemer.toFixed(1)} / 5 (${celkovyPocetHlasov} ${celkovyPocetHlasov === 1 ? 'hodnotenie' : 'hodnotení'})`
+        ? `${aktualnyPriemer.toFixed(1)} ★ / (${celkovyPocetHlasov} ${celkovyPocetHlasov === 1 ? 'hodnotenie' : 'hodnotení'})`
         : "Zatiaľ nikto nehodnotil. Buďte prvý!";
         
+    // Skryjeme hviezdičky, ak by náhodou boli viditeľné
+    if (starsContainer) starsContainer.classList.add('hidden');
+
     alert('Už ste hlasovali. Ďakujeme!');
     return;
   }
@@ -93,8 +99,8 @@ const odoslatHlas = async (pocet) => {
     
     console.log(`Hlas odoslaný: ${pocet} hviezd`);
     
-    // Vizuálna spätná väzba
-    aktualizujHviezdy(pocet);
+    // Po úspešnom hlasovaní skryjeme hviezdičky
+    if (starsContainer) starsContainer.classList.add('hidden');
     localStorage.setItem('uz_hlasoval', 'true');
     isSubmitting = false; 
     alert('Vďaka za hodnotenie!');    
